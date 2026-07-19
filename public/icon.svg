@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#33333d"/>
+      <stop offset="0.55" stop-color="#17171d"/>
+      <stop offset="1" stop-color="#0d0d11"/>
+    </linearGradient>
+    <linearGradient id="ember" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7a44"/>
+      <stop offset="1" stop-color="#e5482a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g stroke="#f2f2f5" stroke-linecap="round">
+    <!-- barra -->
+    <rect x="177.56" y="244.9" width="156.88" height="22.2" rx="11.1" fill="#e9e9ee"/>
+    <!-- discos internos -->
+    <rect x="177.56" y="170.16" width="25.16" height="111" rx="7.4" fill="url(#ember)"/>
+    <rect x="309.28" y="170.16" width="25.16" height="111" rx="7.4" fill="url(#ember)"/>
+    <!-- discos externos -->
+    <rect x="155.36" y="188.66" width="21.386" height="73.26" rx="5.92" fill="#e9e9ee"/>
+    <rect x="335.18" y="188.66" width="21.386" height="73.26" rx="5.92" fill="#e9e9ee"/>
+  </g>
+</svg>
