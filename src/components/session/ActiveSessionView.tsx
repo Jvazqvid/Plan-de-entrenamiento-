@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { SESSIONS_BY_ID } from '@/data/sessions';
+import { weekMethod } from '@/data/methods';
 import { exercisesForWeek } from '@/lib/exercises';
 import { useElapsed, useRestTimer } from '@/hooks/useRestTimer';
 import { fmtDuration } from '@/lib/format';
@@ -85,6 +86,14 @@ export default function ActiveSessionView() {
           />
         ) : (
           <>
+            {(() => {
+              const wm = weekMethod(active.weekIdx);
+              return wm && wm.appliesTo.length > 0 ? (
+                <div className="card" style={{ background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', marginBottom: 12 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>🎯 Esta semana: {wm.label}</div>
+                </div>
+              ) : null;
+            })()}
             <div className="stack">
               {exercises.map((ex, i) => (
                 <ExerciseCard

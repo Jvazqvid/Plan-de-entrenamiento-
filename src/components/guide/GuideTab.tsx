@@ -9,6 +9,7 @@ import {
   VOLUME_LANDMARKS,
 } from '@/data/methodology';
 import { TECHNIQUE } from '@/data/technique';
+import { METHODS } from '@/data/methods';
 import { brzycki, epley, loadForPercent } from '@/lib/oneRepMax';
 import { fmtWeight } from '@/lib/format';
 
@@ -149,6 +150,21 @@ export default function GuideTab() {
               <span className="faint" style={{ fontSize: 11 }}>{p.source}</span>
             </div>
             <p className="muted" style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5 }}>{p.body}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Métodos de entrenamiento */}
+      <div className="section-title">Métodos de entrenamiento</div>
+      <p className="muted" style={{ fontSize: 12.5, marginTop: -6, marginBottom: 10 }}>
+        Cada semana el mesociclo destaca una forma distinta de entrenar para variar el estímulo. Aquí tienes todas:
+      </p>
+      <div className="stack">
+        {METHODS.map((m) => (
+          <div className="card" key={m.id}>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>{m.emoji} {m.name}</div>
+            <div style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5 }}>{m.how}</div>
+            <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>📌 {m.when}</div>
           </div>
         ))}
       </div>

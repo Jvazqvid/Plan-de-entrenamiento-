@@ -146,6 +146,15 @@ export interface Meal {
   note: string;
 }
 
+/** Franja de comida del día. El pool de cada slot rota para dar variedad. */
+export interface MealSlot {
+  id: string;
+  label: string;
+  time: string;
+  /** Si aparece también en día de descanso (el post-entreno no). */
+  onRestDay: boolean;
+}
+
 export interface ShoppingItem {
   id: string;
   name: string;

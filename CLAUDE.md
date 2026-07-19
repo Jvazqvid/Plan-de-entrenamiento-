@@ -40,12 +40,13 @@ buena cualquier cosa que toque `src/lib` o `src/store`.**
 src/
 ├── types.ts              ← modelo de datos central (un tipo por concepto)
 ├── data/                 ← datos semilla (GENERADOS del legado; ver nota abajo)
-│   ├── sessions.ts       · 5 sesiones con ejercicios, variantes por semana, IDs estables
+│   ├── sessions.ts       · 5 sesiones + accesorios extra por semana (variedad), IDs estables
 │   ├── warmups.ts        · calentamientos + variación semanal
 │   ├── stretches.ts      · movilidad post-sesión
 │   ├── catalog.ts        · catálogo por grupo muscular
 │   ├── schedule.ts       · plantilla semanal + constantes del mesociclo
-│   ├── nutrition.ts      · comidas por día, macros, compra, tips
+│   ├── methods.ts        · métodos de intensidad (superseries, dropset…) + asignación por semana
+│   ├── nutrition.ts      · POOL de 60 comidas Lidl (12/franja) + macros + compra + tips
 │   ├── methodology.ts    · tablas de la Guía (de docs/metodologia-fuerza.md)
 │   └── technique.ts      · cues por ejercicio (de docs/tecnica-ejercicios.md)
 ├── lib/                  ← lógica pura, testeable
@@ -57,6 +58,7 @@ src/
 │   ├── tdee.ts           · ajuste de macros por tendencia de peso
 │   ├── coach.ts          · análisis post-sesión heurístico LOCAL (ampliable a IA)
 │   ├── stats.ts          · derivados para Progreso (1RM, volumen, heatmap, CSV)
+│   ├── mealPlan.ts       · rotación del pool de comidas por semana/día + swap
 │   ├── format.ts, sound.ts
 ├── store/useStore.ts     ← Zustand + persist. UN store, migraciones versionadas (v2).
 ├── hooks/useRestTimer.ts ← timer de descanso (pitidos + vibración) + cronómetro

@@ -18,6 +18,8 @@ import { exercisesForWeek, variantWeeks } from '@/lib/exercises';
 import { computeRecords, isOneRmPr, prsThisWeek } from '@/lib/records';
 import { warmupRamp, currentStreak } from '@/lib/tools';
 import { historyToCsv } from '@/lib/stats';
+import { methodForExercise, weekMethod } from '@/data/methods';
+import { planForDay, dayMacros, weekBucket } from '@/lib/mealPlan';
 import { SESSIONS_BY_ID } from '@/data/sessions';
 import { MACROS_BASE } from '@/data/nutrition';
 import { useStore } from '@/store/useStore';
@@ -166,6 +168,36 @@ const prs = prsThisWeek(useStore.getState().history, 7);
 ok('prsThisWeek encuentra PRs', prs.length >= 1, `n=${prs.length}`);
 const csv = historyToCsv(useStore.getState().history);
 ok('CSV tiene cabecera + filas', csv.split('\n').length >= 3 && csv.startsWith('fecha,'), csv.split('\n')[0]);
+
+console.log('\n== Métodos de entrenamiento ==');
+ok('Sem1 = estándar (sin técnica en accesorios)', methodForExercise(0, 'accesorio') === null);
+ok('Sem2 aplica superserie a accesorios', methodForExercise(1, 'accesorio')?.id === 'superserie', JSON.stringify(methodForExercise(1, 'accesorio')));
+ok('Sem3 aplica dropset a aislamientos', methodForExercise(2, 'aislamiento')?.id === 'dropset');
+ok('Sem3 NO aplica a principal', methodForExercise(2, 'principal') === null);
+ok('weekMethod tiene label', (weekMethod(1)?.label ?? '').length > 0);
+
+console.log('\n== Variedad de ejercicios entre semanas ==');
+for (const sid of ['A', 'B', 'C', 'D'] as const) {
+  const sets = [0, 1, 2, 3].map((w) => new Set(exercisesForWeek(SESSIONS_BY_ID[sid], w).map((e) => e.id)));
+  // ninguna semana idéntica a otra
+  let allDistinct = true;
+  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+    if (sets[i].size === sets[j].size && [...sets[i]].every((x) => sets[j].has(x))) allDistinct = false;
+  }
+  ok(`sesión ${sid}: 4 semanas de carga con ejercicios distintos`, allDistinct);
+}
+
+console.log('\n== Plan de comidas (rotación + cambiar) ==');
+const bucket = weekBucket();
+const plan = planForDay(0, bucket, {});
+ok('plan de día de entreno tiene comidas', plan.length >= 4, `n=${plan.length}`);
+const dm = dayMacros(plan);
+ok('macros del día suman kcal', dm.kcal > 1000, `kcal=${dm.kcal}`);
+const restPlan = planForDay(2, bucket, {}); // miércoles = descanso, sin post-entreno
+ok('día de descanso no tiene post-entreno', !restPlan.some((m) => m.slotId === 'postEntreno'));
+const mealFirst = planForDay(0, bucket, {})[0];
+const mealSwapped = planForDay(0, bucket, { [mealFirst.key]: (mealFirst.poolIndex + 1) % mealFirst.poolLength })[0];
+ok('cambiar comida rota a otra del pool', mealFirst.poolLength < 2 || mealSwapped.poolIndex !== mealFirst.poolIndex);
 
 console.log(`\nRESULT: ${pass} passed, ${fail} failed\n`);
 if (fail > 0) process.exit(1);

@@ -24,16 +24,19 @@ npm test         # tests de lógica y de flujo de UI
 - **Hoy** — dashboard: la sesión de hoy con un toque para empezar, tu racha de constancia,
   las sesiones y series de la semana, récords recientes y tu peso corporal.
 - **Entreno** — plan del mesociclo (A·PUSH / B·PULL / C·LEGS / D·UPPER / E·CARDIO),
-  selección de semana (la 5ª es descarga), sesión activa con calentamiento integrado y
+  selección de semana (la 5ª es descarga), **vista previa de cada sesión** antes de
+  empezar, **método de intensidad destacado por semana** (superseries, dropset,
+  rest-pause, myo-reps…) para variar el estímulo, sesión activa con calentamiento y
   series de aproximación, **sugerencia de peso autorregulada por RIR** (doble progresión),
-  RIR por serie, cronómetro de descanso con avisos y vibración, modo kiosco, añadir
-  ejercicios extra y registro de molestias. Récords (PR) marcados en directo. Al guardar,
-  un coach local te da un veredicto.
+  RIR por serie, cronómetro con avisos y vibración, modo kiosco, añadir ejercicios extra y
+  registro de molestias. Récords (PR) en directo. Al guardar, un coach local te da un veredicto.
 - **Progreso** — 1RM estimado por básico con tendencia y proyección, heatmap de constancia,
   peso corporal, medidas, volumen por grupo, comparativa semanal, e historial por ejercicio
   editable con sus récords. Export JSON/CSV, import y ajustes.
-- **Nutrición** — objetivo de macros del día (ajustado por TDEE si hay historial de peso),
-  comida destacada según la hora, progreso de macros, estrategia y lista de la compra.
+- **Nutrición** — **catálogo de 60 comidas Lidl** (12 por franja) que rota cada semana
+  para no repetir; puedes **cambiar cada comida** entre sus alternativas. Objetivo de
+  macros del día (ajustado por TDEE si hay historial de peso), comida destacada según la
+  hora, progreso de macros, estrategia y lista de la compra.
 - **Guía** — calculadora de 1RM y metodología (RIR, %1RM, volumen, descanso, periodización)
   y técnica por ejercicio, extraídas de la biblioteca de fuerza.
 

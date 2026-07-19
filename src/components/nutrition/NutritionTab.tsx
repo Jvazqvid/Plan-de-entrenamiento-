@@ -1,31 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '@/store/useStore';
-import { MACROS_BASE, MEALS_BY_DAY, NUTRITION_TIPS, SHOPPING } from '@/data/nutrition';
+import { MACROS_BASE, NUTRITION_TIPS, SHOPPING } from '@/data/nutrition';
 import { WEEK_TEMPLATE } from '@/data/schedule';
 import { adjustMacros } from '@/lib/tdee';
-import type { Meal } from '@/types';
+import { dayMacros, pickHero, planForDay, weekBucket } from '@/lib/mealPlan';
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 function todayIdx(): number {
-  const js = new Date().getDay(); // 0=Dom
+  const js = new Date().getDay();
   return js === 0 ? 6 : js - 1;
-}
-
-function minutesOf(time: string): number {
-  const [h, m] = time.split(':').map((x) => parseInt(x, 10));
-  return h * 60 + (m || 0);
-}
-
-function pickHeroMeal(meals: Meal[]): { meal: Meal; label: string } | null {
-  if (meals.length === 0) return null;
-  const now = new Date().getHours() * 60 + new Date().getMinutes();
-  const sorted = [...meals].sort((a, b) => minutesOf(a.time) - minutesOf(b.time));
-  const current = sorted.find((m) => Math.abs(minutesOf(m.time) - now) <= 90);
-  if (current) return { meal: current, label: 'Ahora' };
-  const next = sorted.find((m) => minutesOf(m.time) > now);
-  if (next) return { meal: next, label: 'Siguiente' };
-  return { meal: sorted[0], label: 'Mañana' };
 }
 
 function MacroBar({ label, value, target, color }: { label: string; value: number; target: number; color: string }) {
@@ -44,32 +28,30 @@ function MacroBar({ label, value, target, color }: { label: string; value: numbe
 export default function NutritionTab() {
   const bodyWeights = useStore((s) => s.bodyWeights);
   const checkedItems = useStore((s) => s.checkedItems);
+  const mealOverrides = useStore((s) => s.mealOverrides);
   const toggleShopItem = useStore((s) => s.toggleShopItem);
   const clearShopItems = useStore((s) => s.clearShopItems);
+  const setMealOverride = useStore((s) => s.setMealOverride);
 
   const [day, setDay] = useState(todayIdx());
   const [showStrategy, setShowStrategy] = useState(false);
   const [showShopping, setShowShopping] = useState(false);
 
-  const meals = MEALS_BY_DAY[day] ?? [];
+  const bucket = weekBucket();
+  const meals = useMemo(() => planForDay(day, bucket, mealOverrides), [day, bucket, mealOverrides]);
   const dayType = WEEK_TEMPLATE[day]?.type ?? 'train';
   const base = dayType === 'rest' ? MACROS_BASE.rest : MACROS_BASE.train;
   const adj = useMemo(() => adjustMacros(base, bodyWeights), [base, bodyWeights]);
   const target = adj.macros;
 
-  const planned = meals.reduce(
-    (acc, m) => ({
-      kcal: acc.kcal + m.macros.kcal,
-      protein: acc.protein + m.macros.p,
-      carbs: acc.carbs + m.macros.c,
-      fat: acc.fat + m.macros.f,
-    }),
-    { kcal: 0, protein: 0, carbs: 0, fat: 0 },
-  );
+  const planned = dayMacros(meals);
+  const hero = pickHero(meals);
 
-  const hero = pickHeroMeal(meals);
   const checkedCount = SHOPPING.reduce((n, sec) => n + sec.items.filter((it) => checkedItems[it.id]).length, 0);
   const totalItems = SHOPPING.reduce((n, sec) => n + sec.items.length, 0);
+
+  const swap = (key: string, poolIndex: number, poolLength: number) =>
+    setMealOverride(key, (poolIndex + 1) % poolLength);
 
   return (
     <div style={{ paddingTop: 16 }}>
@@ -89,9 +71,7 @@ export default function NutritionTab() {
             </div>
             <div className="hero-num" style={{ fontSize: 28 }}>{target.kcal} <span className="muted" style={{ fontSize: 15 }}>kcal</span></div>
           </div>
-          {adj.adjusted && (
-            <span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>Ajustado por TDEE</span>
-          )}
+          {adj.adjusted && <span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>Ajustado por TDEE</span>}
         </div>
         <div className="stack" style={{ gap: 9 }}>
           <MacroBar label="Calorías" value={planned.kcal} target={target.kcal} color="var(--accent)" />
@@ -114,41 +94,58 @@ export default function NutritionTab() {
             <div className="spread">
               <div className="row" style={{ gap: 8 }}>
                 <span className="pill">{hero.meal.time}</span>
-                {hero.meal.highlight && <span className="badge" style={{ background: 'var(--surface-3)' }}>{hero.meal.highlight}</span>}
+                <span className="faint" style={{ fontSize: 12 }}>{hero.meal.slotLabel}</span>
               </div>
-              <span className="num muted" style={{ fontSize: 12 }}>{hero.meal.macros.kcal} kcal</span>
+              <span className="num muted" style={{ fontSize: 12 }}>{hero.meal.meal.macros.kcal} kcal</span>
             </div>
-            <div style={{ fontWeight: 800, fontSize: 17, marginTop: 8 }}>{hero.meal.label}</div>
+            <div style={{ fontWeight: 800, fontSize: 17, marginTop: 8 }}>{hero.meal.meal.label}</div>
             <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 13.5, lineHeight: 1.5 }}>
-              {hero.meal.items.map((it, i) => <li key={i}>{it}</li>)}
+              {hero.meal.meal.items.map((it, i) => <li key={i}>{it}</li>)}
             </ul>
-            <div className="row" style={{ marginTop: 10, gap: 8, flexWrap: 'wrap' }}>
-              <span className="pill" style={{ fontSize: 11 }}>P {hero.meal.macros.p}g</span>
-              <span className="pill" style={{ fontSize: 11 }}>C {hero.meal.macros.c}g</span>
-              <span className="pill" style={{ fontSize: 11 }}>G {hero.meal.macros.f}g</span>
+            <div className="spread" style={{ marginTop: 10 }}>
+              <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <span className="pill" style={{ fontSize: 11 }}>P {hero.meal.meal.macros.p}g</span>
+                <span className="pill" style={{ fontSize: 11 }}>C {hero.meal.meal.macros.c}g</span>
+                <span className="pill" style={{ fontSize: 11 }}>G {hero.meal.meal.macros.f}g</span>
+              </div>
+              <button className="btn btn-sm" onClick={() => swap(hero.meal.key, hero.meal.poolIndex, hero.meal.poolLength)}>🔄 Cambiar</button>
             </div>
           </div>
         </>
       )}
 
-      {/* Resto de comidas del día */}
+      {/* Comidas del día (todas, con opción de cambiar) */}
       <div className="section-title">Comidas del día</div>
-      <div className="card card-flush" style={{ padding: '4px 16px' }}>
-        {meals.map((m, i) => (
-          <div className="list-item" key={i}>
-            <span className="pill" style={{ fontSize: 11, flex: '0 0 auto' }}>{m.time}</span>
-            <div className="grow">
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{m.label}</div>
-              <div className="faint" style={{ fontSize: 11.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
-                {m.items[0]}
+      <div className="stack">
+        {meals.map((pm) => (
+          <div className="card" key={pm.key}>
+            <div className="spread">
+              <div className="row" style={{ gap: 8 }}>
+                <span className="pill" style={{ fontSize: 11 }}>{pm.time}</span>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>{pm.slotLabel}</span>
               </div>
+              <span className="num muted" style={{ fontSize: 12 }}>{pm.meal.macros.kcal} kcal</span>
             </div>
-            <span className="num muted" style={{ fontSize: 12 }}>{m.macros.kcal}</span>
+            <div style={{ fontWeight: 700, fontSize: 14.5, marginTop: 6 }}>{pm.meal.label}</div>
+            <ul style={{ margin: '6px 0 0', paddingLeft: 18, fontSize: 13, lineHeight: 1.45 }}>
+              {pm.meal.items.map((it, i) => <li key={i}>{it}</li>)}
+            </ul>
+            {pm.meal.note && <div className="faint" style={{ fontSize: 11.5, marginTop: 6, fontStyle: 'italic' }}>{pm.meal.note}</div>}
+            <div className="spread" style={{ marginTop: 10 }}>
+              <div className="row" style={{ gap: 6 }}>
+                <span className="pill" style={{ fontSize: 10.5 }}>P {pm.meal.macros.p}</span>
+                <span className="pill" style={{ fontSize: 10.5 }}>C {pm.meal.macros.c}</span>
+                <span className="pill" style={{ fontSize: 10.5 }}>G {pm.meal.macros.f}</span>
+              </div>
+              <button className="btn btn-sm btn-ghost" onClick={() => swap(pm.key, pm.poolIndex, pm.poolLength)}>
+                🔄 Cambiar ({pm.poolIndex + 1}/{pm.poolLength})
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Estrategia + Lidl */}
+      {/* Estrategia */}
       <div className="section-title">Estrategia</div>
       <div className="card card-flush">
         <button className="acc-head" style={{ width: '100%' }} onClick={() => setShowStrategy(!showStrategy)}>

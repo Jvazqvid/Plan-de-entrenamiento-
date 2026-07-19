@@ -68,6 +68,7 @@ interface PersistState {
   pain: PainEntry[];
   schedule: ScheduleSlot[];
   checkedItems: Record<string, boolean>;
+  mealOverrides: Record<string, number>;
   bodyWeightGoal: number | null;
   bodyWeightGoalDate: string | null;
   settings: Settings;
@@ -107,6 +108,9 @@ interface Actions {
   // compra
   toggleShopItem: (id: string) => void;
   clearShopItems: () => void;
+  // nutrición
+  setMealOverride: (key: string, index: number) => void;
+  clearMealOverrides: () => void;
   // mantenimiento
   resetMesocycle: (startDate?: number) => void;
   exportState: () => string;
@@ -200,6 +204,7 @@ export const useStore = create<AppState>()(
       pain: [],
       schedule: generateSchedule(),
       checkedItems: {},
+      mealOverrides: {},
       bodyWeightGoal: null,
       bodyWeightGoalDate: null,
       settings: DEFAULT_SETTINGS,
@@ -475,6 +480,10 @@ export const useStore = create<AppState>()(
         set((s) => ({ checkedItems: { ...s.checkedItems, [id]: !s.checkedItems[id] } })),
       clearShopItems: () => set({ checkedItems: {} }),
 
+      setMealOverride: (key, index) =>
+        set((s) => ({ mealOverrides: { ...s.mealOverrides, [key]: index } })),
+      clearMealOverrides: () => set({ mealOverrides: {} }),
+
       resetMesocycle: (startDate = Date.now()) =>
         set({ startDate, weekIdx: 0, schedule: generateSchedule(), active: null, lastVerdict: null }),
 
@@ -528,6 +537,7 @@ function partialize(s: AppState): PersistState {
     pain: s.pain,
     schedule: s.schedule,
     checkedItems: s.checkedItems,
+    mealOverrides: s.mealOverrides,
     bodyWeightGoal: s.bodyWeightGoal,
     bodyWeightGoalDate: s.bodyWeightGoalDate,
     settings: s.settings,

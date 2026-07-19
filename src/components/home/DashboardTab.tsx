@@ -10,6 +10,8 @@ import { prsThisWeek } from '@/lib/records';
 import { bodyWeightRate } from '@/lib/tdee';
 import { fmtWeight } from '@/lib/format';
 import Sparkline from '@/components/ui/Sparkline';
+import SessionPreview from '@/components/plan/SessionPreview';
+import { useState } from 'react';
 
 function Ring({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
   const r = 34;
@@ -43,6 +45,7 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
   const bodyWeights = useStore((s) => s.bodyWeights);
   const requestStart = useStore((s) => s.requestStart);
   const reopenSlot = useStore((s) => s.reopenSlot);
+  const [preview, setPreview] = useState(false);
 
   const todayId = (new Date().getDay() + 6) % 7; // 0 = lunes
   const dayTpl = WEEK_TEMPLATE[todayId];
@@ -91,13 +94,15 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
                 Ver / editar sesión
               </button>
             ) : (
-              <button
-                className="btn btn-primary btn-block btn-lg"
-                style={{ marginTop: 14 }}
-                onClick={() => requestStart({ sessionId: todaySession.id, slotId: todaySlot?.id ?? null, weekIdx })}
-              >
-                Empezar entreno
-              </button>
+              <div className="row" style={{ marginTop: 14, gap: 8 }}>
+                <button className="btn" style={{ flex: '0 0 auto' }} onClick={() => setPreview(true)}>👁 Ver</button>
+                <button
+                  className="btn btn-primary grow btn-lg"
+                  onClick={() => requestStart({ sessionId: todaySession.id, slotId: todaySlot?.id ?? null, weekIdx })}
+                >
+                  Empezar entreno
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -199,6 +204,15 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
         <button className="btn grow" onClick={() => onNavigate('progress')}>📈 Progreso</button>
         <button className="btn grow" onClick={() => onNavigate('guide')}>📚 Guía</button>
       </div>
+
+      {preview && todaySession && (
+        <SessionPreview
+          sessionId={todaySession.id}
+          weekIdx={weekIdx}
+          onClose={() => setPreview(false)}
+          onStart={() => { requestStart({ sessionId: todaySession.id, slotId: todaySlot?.id ?? null, weekIdx }); setPreview(false); }}
+        />
+      )}
     </div>
   );
 }

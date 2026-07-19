@@ -4,7 +4,7 @@
 // Se modificarán mucho: este es el punto de partida, no la versión final.
 // ============================================================================
 
-import type { Session } from '@/types';
+import type { Exercise, Session } from '@/types';
 
 export const SESSIONS: Session[] = [
   {
@@ -873,6 +873,49 @@ export const SESSIONS: Session[] = [
     ]
   }
 ];
+
+// ---------------------------------------------------------------------------
+// Accesorios extra de UNA sola semana (variantes S1/S2/S3/S4). Aumentan la
+// variedad para que las semanas "espejo" (1↔3, 2↔4) no compartan tantos
+// ejercicios y no se haga monótono. Los básicos sí repiten cada semana (es
+// intencional: son la base de la progresión). Se añaden al plan al final.
+// ---------------------------------------------------------------------------
+const acc = (
+  id: string, name: string, group: Exercise['group'], variant: string,
+  min: number, max: number, note: string, tag: Exercise['tag'] = 'aislamiento',
+): Exercise => ({ id, name, sets: 3, reps: '12', rest: '60s', note, min, max, step: 2.5, group, tag, variant });
+
+const EXTRA_ACCESSORIES: Record<'A' | 'B' | 'C' | 'D', Exercise[]> = {
+  A: [
+    acc('extra-press-inclinado-smith', 'Press banca inclinado (Smith)', 'Pecho', 'S1', 5, 70, 'Solo Sem 1. Pectoral superior.', 'accesorio'),
+    acc('extra-press-landmine-unilateral', 'Press landmine unilateral', 'Pecho', 'S2', 5, 30, 'Solo Sem 2. Pecho + core antirotación.', 'accesorio'),
+    acc('extra-elevaciones-frontales', 'Elevaciones frontales mancuernas', 'Hombro', 'S3', 5, 12.5, 'Solo Sem 3. Deltoides anterior.'),
+    acc('extra-fondos-entre-bancos', 'Fondos entre bancos', 'Triceps', 'S4', 0, 20, 'Solo Sem 4. Tríceps con peso corporal + lastre.'),
+  ],
+  B: [
+    acc('extra-remo-polea-baja-neutro', 'Remo polea baja agarre neutro', 'Espalda', 'S1', 5, 60, 'Solo Sem 1. Dorsal en tirón horizontal.', 'accesorio'),
+    acc('extra-remo-polea-alta-prono', 'Remo polea alta agarre prono', 'Espalda', 'S2', 5, 50, 'Solo Sem 2. Trapecio medio y dorsal alto.', 'accesorio'),
+    acc('extra-curl-polea-barra-z', 'Curl polea baja barra Z', 'Biceps', 'S3', 5, 30, 'Solo Sem 3. Tensión constante en el bíceps.'),
+    acc('extra-curl-cuerda-polea', 'Curl cuerda polea baja', 'Biceps', 'S4', 5, 20, 'Solo Sem 4. Supinación y pico de bíceps.'),
+  ],
+  C: [
+    acc('extra-extension-cuadriceps', 'Extensión de cuádriceps en polea', 'Cuadriceps', 'S1', 5, 40, 'Solo Sem 1. Aislamiento de cuádriceps.'),
+    acc('extra-prensa-unilateral-smith', 'Prensa unilateral en Smith', 'Cuadriceps', 'S2', 5, 60, 'Solo Sem 2. Corrige descompensaciones.', 'accesorio'),
+    acc('extra-curl-femoral-polea', 'Curl femoral tumbado polea', 'Femoral', 'S3', 5, 30, 'Solo Sem 3. Aislamiento de isquiotibiales.'),
+    acc('extra-patada-gluteo-polea', 'Patada de glúteo en polea', 'Gluteo', 'S4', 5, 20, 'Solo Sem 4. Extensión de cadera aislada.'),
+  ],
+  D: [
+    acc('extra-press-militar-smith-d', 'Press militar (Smith)', 'Hombro', 'S1', 5, 60, 'Solo Sem 1. Empuje vertical pesado.', 'accesorio'),
+    acc('extra-elevaciones-laterales-polea', 'Elevaciones laterales en polea', 'Hombro', 'S2', 5, 20, 'Solo Sem 2. Deltoides medio con tensión constante.'),
+    acc('extra-extension-triceps-cuerda-d', 'Extensión de tríceps en cuerda', 'Triceps', 'S3', 5, 40, 'Solo Sem 3. Vasto externo del tríceps.'),
+    acc('extra-curl-inclinado-d', 'Curl inclinado mancuernas 45°', 'Biceps', 'S4', 5, 15, 'Solo Sem 4. Máximo estiramiento del bíceps.'),
+  ],
+};
+
+for (const s of SESSIONS) {
+  const extra = EXTRA_ACCESSORIES[s.id as 'A' | 'B' | 'C' | 'D'];
+  if (extra) s.exercises.push(...extra);
+}
 
 export const SESSIONS_BY_ID = Object.fromEntries(
   SESSIONS.map((s) => [s.id, s]),

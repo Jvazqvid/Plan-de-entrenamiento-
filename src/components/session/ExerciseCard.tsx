@@ -6,6 +6,7 @@ import { suggestWeight } from '@/lib/progression';
 import { epley, latestOneRm, oneRmTrend } from '@/lib/oneRepMax';
 import { isOneRmPr } from '@/lib/records';
 import { warmupRamp } from '@/lib/tools';
+import { methodForExercise } from '@/data/methods';
 import { fmtWeight, parseRestSeconds, parseTargetReps } from '@/lib/format';
 
 /** Referencia estable: devolver `[]` nuevo desde un selector de zustand crea un
@@ -71,6 +72,7 @@ export default function ExerciseCard({ ex, sessionId, weekIdx, readiness, index,
   const shownOneRm = liveOneRm > 0 ? liveOneRm : latestOneRm(history);
   const trend = oneRmTrend(history);
   const isPr = liveOneRm > 0 && isOneRmPr(history, liveOneRm);
+  const method = methodForExercise(weekIdx, ex.tag);
 
   const bump = (i: number, dir: 1 | -1) => {
     const base = touched[key(i)] ? weights[key(i)] ?? 0 : suggestion.weight;
@@ -113,6 +115,13 @@ export default function ExerciseCard({ ex, sessionId, weekIdx, readiness, index,
         <div className="muted" style={{ fontSize: 12.5, marginTop: 8, fontStyle: 'italic' }}>
           💬 {ex.note}
         </div>
+
+        {method && (
+          <div className="row" style={{ marginTop: 8, gap: 8, padding: '7px 10px', borderRadius: 8, background: 'color-mix(in srgb, var(--accent) 12%, var(--surface-2))', fontSize: 12 }}>
+            <span style={{ fontSize: 14 }}>{method.emoji}</span>
+            <span><b>{method.name}:</b> <span className="muted">{method.how}</span></span>
+          </div>
+        )}
 
         {!isBodyweight && (
           <div
