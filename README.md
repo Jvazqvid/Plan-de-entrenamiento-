@@ -37,8 +37,12 @@ npm test         # tests de lógica y de flujo de UI
   para no repetir; puedes **cambiar cada comida** entre sus alternativas. Objetivo de
   macros del día (ajustado por TDEE si hay historial de peso), comida destacada según la
   hora, progreso de macros, estrategia y lista de la compra.
-- **Guía** — calculadora de 1RM y metodología (RIR, %1RM, volumen, descanso, periodización)
-  y técnica por ejercicio, extraídas de la biblioteca de fuerza.
+- **Guía** — **glosario buscable** (qué significa cada sigla e icono: RIR, 1RM, PR, TDEE…),
+  calculadora de 1RM y metodología (RIR, %1RM, volumen, descanso, periodización) y técnica por
+  ejercicio, extraídas de la biblioteca de fuerza.
+
+Cada abreviatura o icono **subrayado** en la app se puede **tocar** para ver, sin salir de la
+pantalla, qué significa y para qué sirve.
 
 ## Datos
 

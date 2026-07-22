@@ -5,6 +5,8 @@ import { weekMethod } from '@/data/methods';
 import { exercisesForWeek } from '@/lib/exercises';
 import { useElapsed, useRestTimer } from '@/hooks/useRestTimer';
 import { fmtDuration } from '@/lib/format';
+import { Explain } from '@/components/ui/Explain';
+import { SESSION_GLOSSARY } from '@/data/glossary';
 import ExerciseCard from './ExerciseCard';
 import WarmupScreen from './WarmupScreen';
 import RestTimerBar from './RestTimerBar';
@@ -66,7 +68,7 @@ export default function ActiveSessionView() {
       <header className="topbar">
         <button className="icon-btn" onClick={() => setConfirmCancel(true)} aria-label="Cerrar sesión">✕</button>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>{session.label} · {session.title.split('—')[0].trim()}</div>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>{session.label} · <Explain id={SESSION_GLOSSARY[session.id]}>{session.title.split('—')[0].trim()}</Explain></div>
           <div className="num muted" style={{ fontSize: 12 }}>⏱ {fmtDuration(elapsed)} · {doneCount}/{exercises.length} ej.</div>
         </div>
         <div className="row" style={{ gap: 6 }}>
@@ -90,7 +92,7 @@ export default function ActiveSessionView() {
               const wm = weekMethod(active.weekIdx);
               return wm && wm.appliesTo.length > 0 ? (
                 <div className="card" style={{ background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', marginBottom: 12 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>🎯 Esta semana: {wm.label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>🎯 Esta semana: <Explain id={`metodo-${wm.methodId}`}>{wm.label}</Explain></div>
                 </div>
               ) : null;
             })()}

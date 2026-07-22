@@ -18,11 +18,12 @@ import { exercisesForWeek, variantWeeks } from '@/lib/exercises';
 import { computeRecords, isOneRmPr, prsThisWeek } from '@/lib/records';
 import { warmupRamp, currentStreak } from '@/lib/tools';
 import { historyToCsv } from '@/lib/stats';
-import { methodForExercise, weekMethod } from '@/data/methods';
+import { methodForExercise, weekMethod, METHODS } from '@/data/methods';
+import { GLOSSARY, GLOSSARY_BY_ID, SESSION_GLOSSARY } from '@/data/glossary';
 import { planForDay, dayMacros, weekBucket } from '@/lib/mealPlan';
 import { SESSIONS_BY_ID } from '@/data/sessions';
 import { MACROS_BASE } from '@/data/nutrition';
-import { useStore } from '@/store/useStore';
+import { useStore, migratePersisted } from '@/store/useStore';
 import type { Exercise, HistoryEntry, ScheduleSlot } from '@/types';
 
 let pass = 0, fail = 0;
@@ -186,6 +187,62 @@ for (const sid of ['A', 'B', 'C', 'D'] as const) {
   }
   ok(`sesión ${sid}: 4 semanas de carga con ejercicios distintos`, allDistinct);
 }
+
+console.log('\n== Seguridad de datos: la migración NUNCA borra el historial ==');
+// Simula un guardado ANTIGUO (v1) de un usuario con sesiones ya hechas y comprueba
+// que tras migrar a la versión actual el historial sigue intacto. Guardarraíl para
+// que ningún cambio futuro pueda eliminar entrenamientos ya registrados.
+const oldSave = {
+  version: 1,
+  startDate: 1_700_000_000_000,
+  weekIdx: 2,
+  darkMode: true,
+  onboarded: true,
+  history: {
+    'A:bench': [
+      { sessionId: 'A', exerciseId: 'bench', date: '2026-01-10', ts: 1_736_500_000_000, avgWeight: 60, maxWeight: 62.5, reps: 8, sets: 4 },
+      { sessionId: 'A', exerciseId: 'bench', date: '2026-01-17', ts: 1_737_100_000_000, avgWeight: 62.5, maxWeight: 65, reps: 8, sets: 4 },
+    ],
+    'C:squat': [
+      { sessionId: 'C', exerciseId: 'squat', date: '2026-01-12', ts: 1_736_700_000_000, avgWeight: 90, maxWeight: 95, reps: 5, sets: 5 },
+    ],
+  },
+  bodyWeights: [{ v: 80, date: '2026-01-10', ts: 1_736_500_000_000 }],
+  schedule: [],
+};
+const migrated = migratePersisted(oldSave, 1);
+ok('migración eleva la versión a 2', migrated.version === 2, `v=${migrated.version}`);
+ok('migración conserva TODAS las claves de historial', Object.keys(migrated.history).length === 2, JSON.stringify(Object.keys(migrated.history)));
+ok('migración conserva las 2 sesiones de A:bench', migrated.history['A:bench']?.length === 2);
+ok('migración conserva los pesos exactos (65 kg)', migrated.history['A:bench']?.[1]?.maxWeight === 65, JSON.stringify(migrated.history['A:bench']?.[1]));
+ok('migración conserva C:squat', migrated.history['C:squat']?.[0]?.maxWeight === 95);
+ok('migración conserva el peso corporal', migrated.bodyWeights?.[0]?.v === 80);
+ok('migración añade campos nuevos sin romper (mealOverrides)', typeof migrated.mealOverrides === 'object' && migrated.mealOverrides !== null);
+// idempotencia: volver a migrar un estado ya actual no altera el historial
+const reMigrated = migratePersisted(migrated, migrated.version);
+ok('re-migrar no pierde historial', Object.keys(reMigrated.history).length === 2);
+
+console.log('\n== Glosario (integridad de términos e iconos) ==');
+ok('todas las fichas tienen término, título, resumen y cuerpo',
+  GLOSSARY.every((g) => g.term && g.title && g.short && g.body));
+const gIds = GLOSSARY.map((g) => g.id);
+ok('ids del glosario únicos', new Set(gIds).size === gIds.length);
+ok('cada método de entrenamiento tiene ficha en el glosario',
+  METHODS.every((m) => `metodo-${m.id}` in GLOSSARY_BY_ID));
+ok('cada sesión (A-E) apunta a una ficha existente',
+  Object.values(SESSION_GLOSSARY).every((id) => id in GLOSSARY_BY_ID));
+// los enlaces [[id]] dentro de los cuerpos no pueden quedar rotos
+const brokenLinks: string[] = [];
+for (const g of GLOSSARY) {
+  const links = g.body.match(/\[\[([a-z0-9-]+)\]\]/g) ?? [];
+  for (const l of links) {
+    const id = l.slice(2, -2);
+    if (!(id in GLOSSARY_BY_ID)) brokenLinks.push(`${g.id} → ${id}`);
+  }
+}
+ok('los enlaces [[...]] del glosario resuelven', brokenLinks.length === 0, brokenLinks.join(', '));
+ok('términos clave presentes (RIR, 1RM, TDEE, PR)',
+  ['rir', 'one-rm', 'tdee', 'pr'].every((id) => id in GLOSSARY_BY_ID));
 
 console.log('\n== Plan de comidas (rotación + cambiar) ==');
 const bucket = weekBucket();

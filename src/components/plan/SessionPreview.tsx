@@ -4,6 +4,7 @@ import { exercisesForWeek, repsForWeek, setsForWeek, targetRirForWeek } from '@/
 import { weekMethod, methodForExercise } from '@/data/methods';
 import { WARMUPS } from '@/data/warmups';
 import Modal from '@/components/ui/Modal';
+import { Explain } from '@/components/ui/Explain';
 
 interface Props {
   sessionId: SessionId;
@@ -28,7 +29,7 @@ export default function SessionPreview({ sessionId, weekIdx, onClose, onStart }:
     <Modal onClose={onClose} title={`${session.label} · ${session.title.split('—')[0].trim()}`}>
       <div className="row" style={{ gap: 6, flexWrap: 'wrap', marginTop: -6, marginBottom: 12 }}>
         <span className="pill" style={{ borderColor: session.color, color: session.color }}>{session.title.split('—')[1]?.trim()}</span>
-        {sessionId !== 'E' && <span className="pill">RIR objetivo {targetRir}</span>}
+        {sessionId !== 'E' && <span className="pill"><Explain id="rir">RIR</Explain> objetivo {targetRir}</span>}
         <span className="pill">{exercises.length} ejercicios</span>
       </div>
 
@@ -53,7 +54,7 @@ export default function SessionPreview({ sessionId, weekIdx, onClose, onStart }:
               <div className="grow">
                 <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700, fontSize: 14 }}>{ex.name}</span>
-                  {method && <span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>{method.emoji} {method.name.split(' ')[0]}</span>}
+                  {method && <Explain id={`metodo-${method.id}`}><span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>{method.emoji} {method.name.split(' ')[0]}</span></Explain>}
                 </div>
                 <div className="faint" style={{ fontSize: 11.5, marginTop: 2 }}>
                   {setsForWeek(ex, weekIdx) > 0 ? `${setsForWeek(ex, weekIdx)} × ${repsForWeek(ex, weekIdx)}` : repsForWeek(ex, weekIdx)}

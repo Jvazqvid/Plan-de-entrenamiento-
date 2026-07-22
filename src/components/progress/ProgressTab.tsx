@@ -19,6 +19,7 @@ import {
 } from '@/lib/stats';
 import { fmtWeight, shortDate } from '@/lib/format';
 import { VOLUME_LANDMARKS } from '@/data/methodology';
+import { Explain } from '@/components/ui/Explain';
 
 const MEASUREMENT_KINDS: MeasurementKind[] = ['Cuello', 'Pecho', 'Brazo', 'Cintura', 'Cadera', 'Muslo', 'Gemelo'];
 
@@ -134,7 +135,7 @@ export default function ProgressTab() {
       </div>
 
       {/* Fuerza — 1RM de básicos */}
-      <div className="section-title">Fuerza · 1RM estimado</div>
+      <div className="section-title">Fuerza · <Explain id="one-rm">1RM</Explain> estimado</div>
       <div className="stack">
         {lifts.map((lift) => {
           const h = history[lift.key] ?? [];
@@ -179,14 +180,14 @@ export default function ProgressTab() {
           <div className="sub">{lastWeek === 0 ? 'sin referencia previa' : thisWeek >= lastWeek ? `↑ vs ${lastWeek}` : `↓ vs ${lastWeek}`}</div>
         </div>
         <div className="stat">
-          <div className="k">Series totales (7 días)</div>
+          <div className="k"><Explain id="series">Series</Explain> totales (7 días)</div>
           <div className="v">{Object.values(volume).reduce((a, b) => a + b, 0)}</div>
-          <div className="sub">volumen de fuerza</div>
+          <div className="sub"><Explain id="volumen">volumen</Explain> de fuerza</div>
         </div>
       </div>
 
       {/* Volumen por grupo */}
-      <div className="section-title">Volumen semanal por grupo</div>
+      <div className="section-title"><Explain id="volumen">Volumen</Explain> semanal por grupo</div>
       <div className="card">
         {volumeGroups.length === 0 ? (
           <div className="faint" style={{ fontSize: 13 }}>Aún no hay series registradas esta semana.</div>
@@ -201,7 +202,7 @@ export default function ProgressTab() {
                 <div className="bar"><span style={{ width: `${Math.min(100, (v / maxVol) * 100)}%`, background: v >= 10 ? 'var(--good)' : 'var(--accent)' }} /></div>
               </div>
             ))}
-            <div className="faint" style={{ fontSize: 11, marginTop: 4 }}>Referencia: MEV {VOLUME_LANDMARKS[1].series} · óptimo {VOLUME_LANDMARKS[2].series} series/sem.</div>
+            <div className="faint" style={{ fontSize: 11, marginTop: 4 }}>Referencia: <Explain id="mev">MEV</Explain> {VOLUME_LANDMARKS[1].series} · <Explain id="mav">óptimo</Explain> {VOLUME_LANDMARKS[2].series} series/sem.</div>
           </div>
         )}
       </div>
@@ -238,7 +239,7 @@ export default function ProgressTab() {
             <div className="list-item" key={i} style={{ cursor: 'pointer' }} onClick={() => setDetail({ sessionId: r.sessionId, exerciseId: r.exerciseId })}>
               <div className="grow">
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
-                <div className="faint" style={{ fontSize: 11.5 }}>{shortDate(r.date)} · {r.group}{r.rir !== undefined ? ` · RIR ${r.rir}` : ''}</div>
+                <div className="faint" style={{ fontSize: 11.5 }}>{shortDate(r.date)} · {r.group}{r.rir !== undefined ? <> · <Explain id="rir">RIR</Explain> {r.rir}</> : ''}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div className="num" style={{ fontWeight: 700 }}>{fmtWeight(r.maxWeight)} {r.unit ?? 'kg'} × {r.reps}</div>

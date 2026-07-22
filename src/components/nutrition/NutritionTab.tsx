@@ -4,6 +4,7 @@ import { MACROS_BASE, NUTRITION_TIPS, SHOPPING } from '@/data/nutrition';
 import { WEEK_TEMPLATE } from '@/data/schedule';
 import { adjustMacros } from '@/lib/tdee';
 import { dayMacros, pickHero, planForDay, weekBucket } from '@/lib/mealPlan';
+import { Explain } from '@/components/ui/Explain';
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -12,12 +13,12 @@ function todayIdx(): number {
   return js === 0 ? 6 : js - 1;
 }
 
-function MacroBar({ label, value, target, color }: { label: string; value: number; target: number; color: string }) {
+function MacroBar({ label, explainId, value, target, color }: { label: string; explainId?: string; value: number; target: number; color: string }) {
   const pct = target > 0 ? Math.min(100, (value / target) * 100) : 0;
   return (
     <div>
       <div className="spread" style={{ fontSize: 12.5, marginBottom: 4 }}>
-        <span style={{ fontWeight: 600 }}>{label}</span>
+        <span style={{ fontWeight: 600 }}>{explainId ? <Explain id={explainId}>{label}</Explain> : label}</span>
         <span className="num muted">{Math.round(value)} / {target}</span>
       </div>
       <div className="bar"><span style={{ width: `${pct}%`, background: color }} /></div>
@@ -69,15 +70,15 @@ export default function NutritionTab() {
             <div className="faint" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em' }}>
               OBJETIVO · {dayType === 'rest' ? 'DÍA DE DESCANSO' : 'DÍA DE ENTRENO'}
             </div>
-            <div className="hero-num" style={{ fontSize: 28 }}>{target.kcal} <span className="muted" style={{ fontSize: 15 }}>kcal</span></div>
+            <div className="hero-num" style={{ fontSize: 28 }}>{target.kcal} <span className="muted" style={{ fontSize: 15 }}><Explain id="kcal">kcal</Explain></span></div>
           </div>
-          {adj.adjusted && <span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>Ajustado por TDEE</span>}
+          {adj.adjusted && <Explain id="tdee"><span className="badge" style={{ background: 'var(--accent)', color: '#fff' }}>Ajustado por TDEE</span></Explain>}
         </div>
         <div className="stack" style={{ gap: 9 }}>
-          <MacroBar label="Calorías" value={planned.kcal} target={target.kcal} color="var(--accent)" />
-          <MacroBar label="Proteína (g)" value={planned.protein} target={target.protein} color="#22c55e" />
-          <MacroBar label="Carbos (g)" value={planned.carbs} target={target.carbs} color="#f59e0b" />
-          <MacroBar label="Grasa (g)" value={planned.fat} target={target.fat} color="#8b5cf6" />
+          <MacroBar label="Calorías" explainId="kcal" value={planned.kcal} target={target.kcal} color="var(--accent)" />
+          <MacroBar label="Proteína (g)" explainId="proteina" value={planned.protein} target={target.protein} color="#22c55e" />
+          <MacroBar label="Carbos (g)" explainId="carbohidratos" value={planned.carbs} target={target.carbs} color="#f59e0b" />
+          <MacroBar label="Grasa (g)" explainId="grasa" value={planned.fat} target={target.fat} color="#8b5cf6" />
         </div>
         {adj.adjusted && (
           <div className="faint" style={{ fontSize: 11.5, marginTop: 10 }}>
@@ -104,9 +105,9 @@ export default function NutritionTab() {
             </ul>
             <div className="spread" style={{ marginTop: 10 }}>
               <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-                <span className="pill" style={{ fontSize: 11 }}>P {hero.meal.meal.macros.p}g</span>
-                <span className="pill" style={{ fontSize: 11 }}>C {hero.meal.meal.macros.c}g</span>
-                <span className="pill" style={{ fontSize: 11 }}>G {hero.meal.meal.macros.f}g</span>
+                <span className="pill" style={{ fontSize: 11 }}><Explain id="proteina">P</Explain> {hero.meal.meal.macros.p}g</span>
+                <span className="pill" style={{ fontSize: 11 }}><Explain id="carbohidratos">C</Explain> {hero.meal.meal.macros.c}g</span>
+                <span className="pill" style={{ fontSize: 11 }}><Explain id="grasa">G</Explain> {hero.meal.meal.macros.f}g</span>
               </div>
               <button className="btn btn-sm" onClick={() => swap(hero.meal.key, hero.meal.poolIndex, hero.meal.poolLength)}>🔄 Cambiar</button>
             </div>
@@ -133,9 +134,9 @@ export default function NutritionTab() {
             {pm.meal.note && <div className="faint" style={{ fontSize: 11.5, marginTop: 6, fontStyle: 'italic' }}>{pm.meal.note}</div>}
             <div className="spread" style={{ marginTop: 10 }}>
               <div className="row" style={{ gap: 6 }}>
-                <span className="pill" style={{ fontSize: 10.5 }}>P {pm.meal.macros.p}</span>
-                <span className="pill" style={{ fontSize: 10.5 }}>C {pm.meal.macros.c}</span>
-                <span className="pill" style={{ fontSize: 10.5 }}>G {pm.meal.macros.f}</span>
+                <span className="pill" style={{ fontSize: 10.5 }}><Explain id="proteina">P</Explain> {pm.meal.macros.p}</span>
+                <span className="pill" style={{ fontSize: 10.5 }}><Explain id="carbohidratos">C</Explain> {pm.meal.macros.c}</span>
+                <span className="pill" style={{ fontSize: 10.5 }}><Explain id="grasa">G</Explain> {pm.meal.macros.f}</span>
               </div>
               <button className="btn btn-sm btn-ghost" onClick={() => swap(pm.key, pm.poolIndex, pm.poolLength)}>
                 🔄 Cambiar ({pm.poolIndex + 1}/{pm.poolLength})

@@ -11,6 +11,7 @@ import GuideTab from '@/components/guide/GuideTab';
 import ActiveSessionView from '@/components/session/ActiveSessionView';
 import SaveSummary from '@/components/session/SaveSummary';
 import ReadinessModal from '@/components/plan/ReadinessModal';
+import { GlossarySheet } from '@/components/ui/Explain';
 import { primeAudio } from '@/lib/sound';
 
 const TAB_TITLES: Record<Tab, string> = {
@@ -52,6 +53,7 @@ export default function App() {
     return (
       <div className="app">
         <ActiveSessionView />
+        <GlossarySheet />
       </div>
     );
   }
@@ -87,6 +89,8 @@ export default function App() {
       )}
 
       {lastVerdict && <SaveSummary verdict={lastVerdict} onClose={dismissVerdict} />}
+
+      <GlossarySheet />
     </div>
   );
 }

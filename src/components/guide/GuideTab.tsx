@@ -10,6 +10,8 @@ import {
 } from '@/data/methodology';
 import { TECHNIQUE } from '@/data/technique';
 import { METHODS } from '@/data/methods';
+import { GLOSSARY, GLOSSARY_CATEGORIES } from '@/data/glossary';
+import { useGlossary } from '@/store/useGlossary';
 import { brzycki, epley, loadForPercent } from '@/lib/oneRepMax';
 import { fmtWeight } from '@/lib/format';
 
@@ -49,6 +51,55 @@ function OneRmCalculator() {
   );
 }
 
+function Glosario() {
+  const [q, setQ] = useState('');
+  const open = useGlossary((s) => s.open);
+  const needle = q.trim().toLowerCase();
+  const match = (s: string) => s.toLowerCase().includes(needle);
+  const filtered = GLOSSARY.filter(
+    (g) => !needle || match(g.term) || match(g.title) || match(g.short),
+  );
+
+  return (
+    <div>
+      <p className="muted" style={{ fontSize: 12.5, marginTop: -6, marginBottom: 10, lineHeight: 1.5 }}>
+        Cada abreviatura o icono <b>subrayado</b> en la app se puede tocar para ver aquí qué significa.
+        Este es el listado completo.
+      </p>
+      <input
+        className="field"
+        placeholder="Buscar término (RIR, 1RM, TDEE…)"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        style={{ marginBottom: 12 }}
+      />
+      {GLOSSARY_CATEGORIES.map((cat) => {
+        const items = filtered.filter((g) => g.category === cat.id);
+        if (items.length === 0) return null;
+        return (
+          <div key={cat.id} style={{ marginBottom: 14 }}>
+            <div className="faint" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.05em', margin: '4px 0 8px' }}>
+              {cat.emoji} {cat.label.toUpperCase()}
+            </div>
+            <div className="card card-flush" style={{ padding: '2px 14px' }}>
+              {items.map((g) => (
+                <button key={g.id} className="list-item" style={{ width: '100%', textAlign: 'left' }} onClick={() => open(g.id)}>
+                  <span className="glossary-term" style={{ fontSize: 15, minWidth: 60, flex: '0 0 auto' }}>{g.term}</span>
+                  <div className="grow">
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{g.title}</div>
+                    <div className="muted" style={{ fontSize: 12, marginTop: 1, lineHeight: 1.4 }}>{g.short}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {filtered.length === 0 && <div className="faint" style={{ fontSize: 13 }}>Sin resultados para "{q}".</div>}
+    </div>
+  );
+}
+
 function Table({ head, rows }: { head: string[]; rows: (string | number)[][] }) {
   return (
     <div className="tbl-wrap">
@@ -81,6 +132,10 @@ export default function GuideTab() {
           Carrasco · Vinuesa · Delavier). Es lo que sostiene las decisiones de la app.
         </p>
       </div>
+
+      {/* Glosario */}
+      <div className="section-title">Glosario · qué significa cada sigla</div>
+      <Glosario />
 
       {/* Calculadora */}
       <div className="section-title">Herramientas</div>

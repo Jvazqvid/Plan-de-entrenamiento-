@@ -46,6 +46,7 @@ src/
 │   ├── catalog.ts        · catálogo por grupo muscular
 │   ├── schedule.ts       · plantilla semanal + constantes del mesociclo
 │   ├── methods.ts        · métodos de intensidad (superseries, dropset…) + asignación por semana
+│   ├── glossary.ts       · FUENTE ÚNICA del significado de siglas/iconos (RIR, 1RM, PR, TDEE…)
 │   ├── nutrition.ts      · POOL de 60 comidas Lidl (12/franja) + macros + compra + tips
 │   ├── methodology.ts    · tablas de la Guía (de docs/metodologia-fuerza.md)
 │   └── technique.ts      · cues por ejercicio (de docs/tecnica-ejercicios.md)
@@ -60,9 +61,12 @@ src/
 │   ├── stats.ts          · derivados para Progreso (1RM, volumen, heatmap, CSV)
 │   ├── mealPlan.ts       · rotación del pool de comidas por semana/día + swap
 │   ├── format.ts, sound.ts
-├── store/useStore.ts     ← Zustand + persist. UN store, migraciones versionadas (v2).
+├── store/
+│   ├── useStore.ts       ← Zustand + persist. UN store, migraciones versionadas (v2).
+│   └── useGlossary.ts    ← store UI (no persistido): qué ficha del glosario está abierta
 ├── hooks/useRestTimer.ts ← timer de descanso (pitidos + vibración) + cronómetro
 └── components/           ← UI por pestaña (home · plan · progress · nutrition · guide · session)
+    └── ui/Explain.tsx    · término/icono pulsable + <GlossarySheet/> global (montado en App)
 ```
 
 ### Regenerar los datos semilla
@@ -88,7 +92,11 @@ evita **por diseño**; no las reintroduzcas. Detalle en `docs/decisiones-datos.m
    está vacío hasta que el usuario escribe.
 6. **Persistencia = estado completo.** `persist` escribe todo el estado (merge por diseño);
    nunca reconstruimos el objeto a mano. Imposible perder campos.
-7. **Migraciones síncronas y versionadas** vía `persist({ version, migrate })`.
+7. **Migraciones síncronas y versionadas** vía `persist({ version, migrate })`. La migración
+   (`migratePersisted`) **siempre parte del estado guardado (spread) y solo añade/normaliza
+   campos**: nunca reconstruye desde cero. La clave de `persist` (`fuerza_v1`) **no se cambia
+   jamás** (cambiarla dejaría huérfano el historial del usuario). `smoke.test.ts` incluye un
+   test de regresión que simula un guardado antiguo y verifica que el `history` sobrevive.
 8. **Reps: misma clave para leer y escribir** (`active.reps`).
 
 ## Convenciones

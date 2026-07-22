@@ -136,6 +136,32 @@ debería unificarse todo en un único modelo de datos coherente.
 **Export/import JSON:** permite descargar todo el estado como archivo y restaurarlo,
 útil como backup manual o para mover datos entre dispositivos.
 
+**Garantía de no perder datos (reimplementación actual):** el estado se persiste bajo la
+clave `fuerza_v1` con `persist({ version, migrate })`. La migración (`migratePersisted`)
+parte siempre del estado guardado y solo añade/normaliza campos nuevos — nunca reconstruye
+el objeto ni elimina el `history`. La clave de almacenamiento no se cambia jamás. Actualizar
+la app (desplegar código nuevo) **no borra** los entrenamientos ya registrados, porque
+`localStorage` es del dominio y sobrevive a los despliegues. Hay un test de regresión en
+`smoke.test.ts` que lo verifica simulando un guardado antiguo.
+
+## Glosario (significado de siglas e iconos)
+
+Cualquier abreviatura, sigla o icono con carga de significado que aparezca en la interfaz
+se muestra con un **subrayado punteado** y es **pulsable**: al tocarlo se abre una ficha
+(bottom-sheet) con su nombre completo, una frase resumen, la explicación de para qué sirve
+y, cuando aporta, un ejemplo concreto (p. ej. "RIR 3 = paras dejándote 3 reps en el
+depósito"). Las fichas pueden enlazar a otras siglas relacionadas.
+
+- Fuente única de contenidos: `src/data/glossary.ts` (los métodos de intensidad se derivan
+  de `methods.ts` para no duplicar texto).
+- La pestaña **Guía** incluye además un **Glosario buscable** con el listado completo
+  agrupado en Entrenamiento · Nutrición · Iconos; tocar una entrada abre su misma ficha.
+- Cubre, entre otros: RIR, RPE, 1RM, %1RM, PR, serie top, doble progresión, aproximación,
+  disposición, mesociclo, descarga, volumen (MV/MEV/MAV/MRV), Epley, c/l, códigos S1–S5,
+  HIIT, Zona 2, FCmax, sesiones A–E (PUSH/PULL/LEGS/UPPER/CARDIO), los 8 métodos de
+  entrenamiento, TDEE, kcal, macros (P/C/G), y los iconos de acción/estado (🏆 🔥 💡 💬 ✓
+  🔄 👁 ↑↓ y el icono de sugerencia de carga).
+
 ## PWA e icono
 
 Instalable como PWA (manifest inline, generado por JS, con iconos SVG y PNG embebidos

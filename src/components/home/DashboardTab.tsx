@@ -11,6 +11,8 @@ import { bodyWeightRate } from '@/lib/tdee';
 import { fmtWeight } from '@/lib/format';
 import Sparkline from '@/components/ui/Sparkline';
 import SessionPreview from '@/components/plan/SessionPreview';
+import { Explain } from '@/components/ui/Explain';
+import { SESSION_GLOSSARY } from '@/data/glossary';
 import { useState } from 'react';
 
 function Ring({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
@@ -70,7 +72,7 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
         <div className="faint" style={{ fontSize: 13 }}>{greeting()},</div>
         <h1 style={{ fontSize: 24, marginTop: 2 }}>
           {weekPlan.focus}{' '}
-          {isDeloadWeek(weekIdx) && <span className="badge" style={{ background: 'var(--warn)', color: '#000' }}>Descarga</span>}
+          {isDeloadWeek(weekIdx) && <Explain id="descarga"><span className="badge" style={{ background: 'var(--warn)', color: '#000' }}>Descarga</span></Explain>}
         </h1>
       </div>
 
@@ -85,7 +87,9 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
               </span>
               {todaySlot?.status === 'done' && <span className="badge" style={{ background: 'var(--good)', color: '#fff' }}>Hecho</span>}
             </div>
-            <div style={{ fontWeight: 800, fontSize: 18, marginTop: 8 }}>{todaySession.title}</div>
+            <div style={{ fontWeight: 800, fontSize: 18, marginTop: 8 }}>
+              <Explain id={SESSION_GLOSSARY[todaySession.id]}>{todaySession.title}</Explain>
+            </div>
             <div className="muted" style={{ fontSize: 13, marginTop: 3 }}>
               {exercisesForWeek(todaySession, weekIdx).length} ejercicios · {weekPlan.rir}
             </div>
@@ -131,7 +135,7 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
       {/* Métricas */}
       <div className="stat-grid" style={{ marginTop: 16 }}>
         <div className="stat">
-          <div className="k">🔥 Racha</div>
+          <div className="k"><Explain id="racha">🔥 Racha</Explain></div>
           <div className="v">{streak}</div>
           <div className="sub">{streak === 1 ? 'sesión seguida' : 'sesiones seguidas'}</div>
         </div>
@@ -148,7 +152,7 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
         <Ring value={sessionsWeek} max={5} color="var(--accent)" label="sesiones" />
         <div className="grow">
           <div className="spread" style={{ fontSize: 14 }}>
-            <span className="muted">Series totales</span>
+            <span className="muted"><Explain id="series">Series</Explain> totales</span>
             <span className="num" style={{ fontWeight: 800 }}>{totalSeries}</span>
           </div>
           <div className="divider" style={{ margin: '10px 0' }} />
@@ -162,14 +166,14 @@ export default function DashboardTab({ onNavigate }: { onNavigate: (t: Tab) => v
       {/* PRs de la semana */}
       {prs.length > 0 && (
         <>
-          <div className="section-title">Récords de esta semana 🎉</div>
+          <div className="section-title"><Explain id="pr">Récords</Explain> de esta semana 🎉</div>
           <div className="card card-flush" style={{ padding: '4px 16px' }}>
             {prs.slice(0, 5).map((pr) => (
               <div className="list-item" key={pr.key}>
                 <span style={{ fontSize: 18 }}>🏅</span>
                 <div className="grow">
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{EXERCISE_INDEX[pr.key]?.name ?? pr.key}</div>
-                  <div className="faint" style={{ fontSize: 11.5 }}>Nuevo 1RM estimado</div>
+                  <div className="faint" style={{ fontSize: 11.5 }}>Nuevo <Explain id="one-rm">1RM</Explain> estimado</div>
                 </div>
                 <span className="num" style={{ fontWeight: 800 }}>{pr.oneRm} kg</span>
               </div>

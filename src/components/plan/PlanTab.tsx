@@ -6,6 +6,8 @@ import { WEEK_TEMPLATE, MESOCYCLE_WEEKS } from '@/data/schedule';
 import { exercisesForWeek, isDeloadWeek, targetRirForWeek } from '@/lib/exercises';
 import { MESOCYCLE_PLAN } from '@/data/methodology';
 import { weekMethod } from '@/data/methods';
+import { SESSION_GLOSSARY } from '@/data/glossary';
+import { Explain } from '@/components/ui/Explain';
 import SessionPreview from './SessionPreview';
 
 export default function PlanTab() {
@@ -51,7 +53,7 @@ export default function PlanTab() {
           <div>
             <div style={{ fontWeight: 800, fontSize: 17 }}>{weekPlan.focus}</div>
             <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>
-              Objetivo de esfuerzo: {weekPlan.rir} en los básicos
+              Objetivo de <Explain id="rir">esfuerzo</Explain>: {weekPlan.rir} en los básicos
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -67,7 +69,7 @@ export default function PlanTab() {
         {wm && wm.appliesTo.length > 0 && (
           <div className="row" style={{ gap: 6, marginTop: 12, fontSize: 12.5 }}>
             <span style={{ fontSize: 15 }}>🎯</span>
-            <span className="muted">{wm.label}</span>
+            <Explain id={`metodo-${wm.methodId}`}><span className="muted">{wm.label}</span></Explain>
           </div>
         )}
       </div>
@@ -97,14 +99,16 @@ export default function PlanTab() {
                 <div className="grow">
                   <div className="row" style={{ gap: 8 }}>
                     <span className="pill" style={{ borderColor: session.color, color: session.color }}>
-                      {day.label} · {session.id}
+                      {day.label} · <Explain id={SESSION_GLOSSARY[session.id]}>{session.id}</Explain>
                     </span>
                     {done && <span className="badge" style={{ background: 'var(--good)', color: '#fff' }}>Hecho</span>}
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 16, marginTop: 8 }}>{session.title}</div>
+                  <div style={{ fontWeight: 800, fontSize: 16, marginTop: 8 }}>
+                    <Explain id={SESSION_GLOSSARY[session.id]}>{session.title}</Explain>
+                  </div>
                   <div className="muted" style={{ fontSize: 12.5, marginTop: 3 }}>
                     {exCount} ejercicios
-                    {session.id !== 'E' && ` · RIR ${targetRir}`}
+                    {session.id !== 'E' && <> · <Explain id="rir">RIR</Explain> {targetRir}</>}
                     {done && slot?.durationMin ? ` · ${slot.durationMin} min · ${slot.completionPct}%` : ''}
                   </div>
                 </div>

@@ -188,6 +188,28 @@ function upsertHistory(
   return { ...history, [key]: list };
 }
 
+/**
+ * Migración versionada del estado persistido. SIEMPRE parte del objeto guardado
+ * (spread) y solo añade/normaliza campos: NUNCA reconstruye desde cero, para que
+ * el historial de entrenamientos del usuario no se pueda perder al actualizar.
+ * Está extraída (y testeada en smoke.test.ts) precisamente como red de seguridad:
+ * si un cambio futuro amenazara los datos ya guardados, el test falla antes de subir.
+ */
+export function migratePersisted(persisted: unknown, version: number): PersistState {
+  const p = (persisted ?? {}) as Partial<PersistState>;
+  // v1 → v2: nuevos campos con valores por defecto; active gana rir/extra.
+  if (version < 2) {
+    p.settings = { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) };
+    p.measurements = p.measurements ?? [];
+    p.mealOverrides = p.mealOverrides ?? {};
+    if (p.active) {
+      p.active = { ...p.active, rir: p.active.rir ?? {}, extra: p.active.extra ?? [] };
+    }
+    p.version = 2;
+  }
+  return p as PersistState;
+}
+
 const initialStartDate = Date.now();
 
 export const useStore = create<AppState>()(
@@ -507,19 +529,7 @@ export const useStore = create<AppState>()(
       name: 'fuerza_v1',
       version: STORE_VERSION,
       partialize: (s) => partialize(s),
-      migrate: (persisted, version) => {
-        const p = persisted as Partial<PersistState>;
-        // v1 → v2: nuevos campos con valores por defecto; active gana rir/extra.
-        if (version < 2) {
-          p.settings = { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) };
-          p.measurements = p.measurements ?? [];
-          if (p.active) {
-            p.active = { ...p.active, rir: p.active.rir ?? {}, extra: p.active.extra ?? [] };
-          }
-          p.version = 2;
-        }
-        return p as PersistState;
-      },
+      migrate: (persisted, version) => migratePersisted(persisted, version),
     },
   ),
 );

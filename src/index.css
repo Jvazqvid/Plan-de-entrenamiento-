@@ -661,3 +661,108 @@ table.tbl tr:last-child td { border-bottom: none; }
   color: var(--text);
   box-shadow: var(--shadow);
 }
+
+/* --- Glosario: términos e iconos explicables ------------------------------ */
+
+/* Texto con subrayado punteado: indica que se puede tocar para ver qué significa. */
+.explain {
+  display: inline;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, var(--accent) 65%, transparent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  -webkit-tap-highlight-color: transparent;
+}
+.explain:active { color: var(--accent); }
+
+/* Icono/emoji explicable: sin subrayado, con leve realce al pulsar. */
+.explain-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: help;
+  border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.explain-icon:active { transform: scale(0.9); }
+
+/* Ficha del glosario dentro del bottom-sheet. */
+.glossary-card { padding-top: 2px; }
+.glossary-term {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+.glossary-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+.glossary-short {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 12px;
+  line-height: 1.45;
+}
+.glossary-body {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.55;
+}
+.glossary-link {
+  font: inherit;
+  font-weight: 700;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.glossary-example {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-md, 10px);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.glossary-example-tag {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 5px;
+}
+
+/* Chip "?" para abrir el glosario completo. */
+.glossary-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
